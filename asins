@@ -1,0 +1,36 @@
+from requests_html import HTMLSession
+import pandas as pd
+import csv
+
+s = HTMLSession()
+asins = []
+
+#read csv to list
+with open('asins.csv', 'r') as f:
+    csv_reader = csv.reader(f)
+    for row in csv_reader:
+        asins.append(row[0])
+
+controllerprices = []
+print("---------------------------------Products------------------------------------")
+for asin in asins:
+    r = s.get(f'https://www.amazon.com/dp/{asin}')
+    r.html.render(sleep=1)
+    try:
+        product = {
+            'title' : r.html.find('#productTitle')[0].text.strip(),
+            'price' : r.html.find('.a-offscreen')[0].text.replace('$',''),
+            'shipping': r.html.xpath('//*[@id="mir-layout-DELIVERY_BLOCK-slot-PRIMARY_DELIVERY_MESSAGE_LARGE"]/span', first=True).text
+        }
+        print(product)
+    except:
+        product = {
+            'title': r.html.xpath('//*[@id="productTitle"]', first=True).text,
+            'price': 'item unavailable',
+            'shipping': 'item unavailable'
+        }   
+    controllerprices.append(product)
+
+print("\nTotal ASINS: ", len(controllerprices))
+pricesdf = pd.DataFrame(controllerprices)
+pricesdf.to_excel('/Users/DongM/Desktop/controllerprices.xlsx', index=False)
