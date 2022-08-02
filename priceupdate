@@ -1,0 +1,29 @@
+import csv
+import pandas as pd
+import os
+from datetime import datetime
+import shutil
+import glob
+
+
+d = datetime.today()
+date = d.strftime("%m%d%Y")
+
+print('\n\n-------------------------')
+exportFile = input('Enter the export CSV path:\n')
+#Enter Brand Name
+brandName = input('\nEnter Brand name without space:\n')
+
+
+savePath = '/Users/DongM/Desktop/price update/' + brandName + '_price_update-' + date
+backupPath = savePath + '-BACKUP.csv'
+shutil.copyfile(exportFile, backupPath)
+print ('\nBackup File Rename ----- Complete')
+
+
+workingFile = savePath + '-WORKING.csv'
+shutil.copyfile(backupPath, workingFile)
+
+read_file = pd.read_csv (workingFile, encoding='latin-1')
+read_file.to_excel (savePath + '-WORKING.xlsx', index = None, header=True)
+print ('Working File Create ----- Complete')
