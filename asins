@@ -33,4 +33,4 @@ for asin in asins:
 
 print("\nTotal ASINS: ", len(controllerprices))
 pricesdf = pd.DataFrame(controllerprices)
-pricesdf.to_excel('/Users/DongM/Desktop/controllerprices.xlsx', index=False)
+pricesdf.to_excel('products.xlsx', index=False)
