@@ -11,11 +11,14 @@ date = d.strftime("%m%d%Y")
 
 print('\n\n-------------------------')
 exportFile = input('Enter the export CSV path:\n')
-
-#Enter Brand Name
 brandName = input('\nEnter Brand name without space:\n')
 
-savePath = '/Desktop/price update/' + brandName + '_price_update-' + date
+mainDir = '/Desktop/price update/'
+subDir = mainDir + brandName + '/'
+os.mkdir (subDir)
+print ('\nBrand Folder Create ----- Complete')
+
+savePath = subDir + brandName + '_price_update-' + date
 backupPath = savePath + '-BACKUP.csv'
 shutil.copyfile(exportFile, backupPath)
 print ('\nBackup File Rename ----- Complete')
@@ -39,4 +42,15 @@ df.to_csv(workingFile, encoding='utf-8', index=False, header=True)
 
 read_file = pd.read_csv (workingFile, encoding='latin-1')
 read_file.to_excel (savePath + '-WORKING.xlsx', index = None, header=True)
-print ('Working File Create ----- Complete')
+print ('\nWorking File Create ----- Complete')
+
+dest = shutil.move(workingFile, mainDir)
+print ('\nFile organize ----- Complete')
+
+workingFile = savePath + '-WORKING.xlsx'
+print(workingFile)
+df = pd.read_excel(workingFile)
+insert = df.columns.get_loc('ka_price_list') + 1
+df.insert(insert, 'ka_price_list_NEW', None)
+
+print(df.columns.get_loc('ka_price_list_NEW'))
