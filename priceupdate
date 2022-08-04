@@ -13,15 +13,15 @@ print('\n\n-------------------------')
 exportFile = input('Enter the export CSV path:\n')
 brandName = input('\nEnter Brand name without space:\n')
 
-mainDir = '/Desktop/price update/'
+mainDir = '/Users/xx/Desktop/price update/'
 subDir = mainDir + brandName + '/'
 os.mkdir (subDir)
-print ('\nBrand Folder Create ----- Complete')
+print ('\nBrand Folder Created ----- Complete')
 
 savePath = subDir + brandName + '_price_update-' + date
 backupPath = savePath + '-BACKUP.csv'
 shutil.copyfile(exportFile, backupPath)
-print ('\nBackup File Rename ----- Complete')
+print ('\nBackup File Renamed ----- Complete')
 
 workingFile = savePath + '-WORKING.csv'
 shutil.copyfile(backupPath, workingFile)
@@ -42,15 +42,36 @@ df.to_csv(workingFile, encoding='utf-8', index=False, header=True)
 
 read_file = pd.read_csv (workingFile, encoding='latin-1')
 read_file.to_excel (savePath + '-WORKING.xlsx', index = None, header=True)
-print ('\nWorking File Create ----- Complete')
+print ('\nWorking File Created ----- Complete')
 
 dest = shutil.move(workingFile, mainDir)
-print ('\nFile organize ----- Complete')
+print ('\nFile organized ----- Complete')
 
+priceColumns = ['gen_price_update_date', 'ka_price_list', 'cost', 'cost_freight', 'ka_price_map', 'price', 'ka_price_local']
 workingFile = savePath + '-WORKING.xlsx'
-print(workingFile)
 df = pd.read_excel(workingFile)
-insert = df.columns.get_loc('ka_price_list') + 1
-df.insert(insert, 'ka_price_list_NEW', None)
 
-print(df.columns.get_loc('ka_price_list_NEW'))
+for col in priceColumns:
+    insert = df.columns.get_loc(col) + 1
+    df.insert(insert, col + '_NEW', None)
+    
+def fill_color(val):
+    return 'background-color: green'
+df = df.style.applymap(fill_color, subset=['gen_price_update_date', 'ka_price_list', 'cost', 'cost_freight', 'ka_price_map', 'price', 'ka_price_local'])
+
+df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
+print ('\nNew Columns ADDED ----- Complete')
+
+
+
+
+# /Users//Desktop/price update/catalog_product_20220802_193713.csv
+
+# df = pd.read_csv(workingFile)
+# df.to_csv(path_or_buf = workingFile, columns = ['sku', 'a0_mfr_id', 'product_online', 'custom_options', 'gen_vendor',
+#     'mfr_discount_product_category','mfr_model_replacement', 'mfr_model_status', 'a0_special_order', 'ext_stock_status_in',
+#     'ext_stock_status_out','mfr_model_status_date_update', 'gen_price_update_date', 'map_price', 'msrp_price',
+#     'product_options_container', 'ka_price_list', 'cost', 'cost_bandg', 'cost_bsem', 'cost_daroma', 'cost_freight',
+#     'cost_special_model','cost_special_value', 'cost_web', 'ka_price_map', 'price', 'ka_price_local'],  index=False)
+
+# df.query('product_online == 1 & mfr_model_status == "Active"')
