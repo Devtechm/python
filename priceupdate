@@ -3,7 +3,6 @@ import pandas as pd
 import os
 from datetime import datetime
 import shutil
-import glob
 
 
 d = datetime.today()
@@ -13,7 +12,7 @@ print('\n\n-------------------------')
 exportFile = input('Enter the export CSV path:\n')
 brandName = input('\nEnter Brand name without space:\n')
 
-mainDir = '/Users/xx/Desktop/price update/'
+mainDir = '/Users//Desktop/price update/'
 subDir = mainDir + brandName + '/'
 os.mkdir (subDir)
 print ('\nBrand Folder Created ----- Complete')
@@ -48,30 +47,19 @@ dest = shutil.move(workingFile, mainDir)
 print ('\nFile organized ----- Complete')
 
 priceColumns = ['gen_price_update_date', 'ka_price_list', 'cost', 'cost_freight', 'ka_price_map', 'price', 'ka_price_local']
+newPriceColumns = []
 workingFile = savePath + '-WORKING.xlsx'
 df = pd.read_excel(workingFile)
 
 for col in priceColumns:
     insert = df.columns.get_loc(col) + 1
     df.insert(insert, col + '_NEW', None)
+    newPriceColumns.append(col + '_NEW')
+
+print ('\nNew Columns ADDED ----- Complete')
     
 def fill_color(val):
     return 'background-color: green'
-df = df.style.applymap(fill_color, subset=['gen_price_update_date', 'ka_price_list', 'cost', 'cost_freight', 'ka_price_map', 'price', 'ka_price_local'])
-
+df = df.style.applymap(fill_color, subset=newPriceColumns)
 df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
-print ('\nNew Columns ADDED ----- Complete')
-
-
-
-
-# /Users//Desktop/price update/catalog_product_20220802_193713.csv
-
-# df = pd.read_csv(workingFile)
-# df.to_csv(path_or_buf = workingFile, columns = ['sku', 'a0_mfr_id', 'product_online', 'custom_options', 'gen_vendor',
-#     'mfr_discount_product_category','mfr_model_replacement', 'mfr_model_status', 'a0_special_order', 'ext_stock_status_in',
-#     'ext_stock_status_out','mfr_model_status_date_update', 'gen_price_update_date', 'map_price', 'msrp_price',
-#     'product_options_container', 'ka_price_list', 'cost', 'cost_bandg', 'cost_bsem', 'cost_daroma', 'cost_freight',
-#     'cost_special_model','cost_special_value', 'cost_web', 'ka_price_map', 'price', 'ka_price_local'],  index=False)
-
-# df.query('product_online == 1 & mfr_model_status == "Active"')
+print ('\nNew Columns Color ADDED ----- Complete')
