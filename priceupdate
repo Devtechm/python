@@ -3,6 +3,8 @@ import pandas as pd
 import os
 from datetime import datetime
 import shutil
+import openpyxl
+from openpyxl.styles import PatternFill
 
 
 d = datetime.today()
@@ -26,7 +28,9 @@ workingFile = savePath + '-WORKING.csv'
 shutil.copyfile(backupPath, workingFile)
 
 df = pd.read_csv(workingFile, encoding='latin-1')
-columns = ['sku', 'a0_mfr_id', 'product_online', 'custom_options', 'gen_vendor', 'mfr_discount_product_category',
+df = df.sort_values(by=["mfr_discount_product_category"])
+
+columns = ['a0_mfr_id', 'sku', 'product_online', 'custom_options', 'gen_vendor', 'mfr_discount_product_category',
     'mfr_model_replacement', 'mfr_model_status', 'a0_special_order', 'ext_stock_status_in', 'ext_stock_status_out',
     'mfr_model_status_date_update', 'gen_price_update_date', 'map_price', 'msrp_price', 'product_options_container',
     'ka_price_list', 'cost', 'cost_bandg', 'cost_bsem', 'cost_daroma', 'cost_freight', 'cost_special_model',
@@ -37,6 +41,7 @@ for i in range(len(columns)):
     leftColumns = df.pop(columns[i])
     df.insert(0, columns[i], leftColumns)
 
+
 df.to_csv(workingFile, encoding='utf-8', index=False, header=True)
 
 read_file = pd.read_csv (workingFile, encoding='latin-1')
@@ -46,10 +51,16 @@ print ('\nWorking File Created ----- Complete')
 dest = shutil.move(workingFile, mainDir)
 print ('\nFile organized ----- Complete')
 
+formulaColumns = [' ', 'VLOOKUP', 'COST Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula', '']
 priceColumns = ['gen_price_update_date', 'ka_price_list', 'cost', 'cost_freight', 'ka_price_map', 'price', 'ka_price_local']
 newPriceColumns = []
 workingFile = savePath + '-WORKING.xlsx'
 df = pd.read_excel(workingFile)
+
+insert = df.columns.get_loc('product_options_container') + 1
+for col in formulaColumns:
+    df.insert(insert, col, None)
+    insert = df.columns.get_loc(col) + 1
 
 for col in priceColumns:
     insert = df.columns.get_loc(col) + 1
@@ -57,9 +68,38 @@ for col in priceColumns:
     newPriceColumns.append(col + '_NEW')
 
 print ('\nNew Columns ADDED ----- Complete')
-    
+
 def fill_color(val):
     return 'background-color: green'
 df = df.style.applymap(fill_color, subset=newPriceColumns)
 df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
 print ('\nNew Columns Color ADDED ----- Complete')
+
+
+wb = openpyxl.load_workbook(filename=workingFile)
+
+sheet = wb['Sheet1']
+emptyRow = ['']
+indent=0
+# while (indent < 2):
+#     sheet.append(emptyRow)
+#     indent+=1
+
+discontinue = ['TO BE HIDDEN/DISCONTINUED']
+sheet.append(discontinue)
+wb.save(workingFile)
+print("\nDiscontinue Row Added ----- Complete")
+
+lastRow = len(sheet['A'])
+for i in range (65, 91):
+    rowName = chr(i) + str(lastRow)
+    fill_pattern = PatternFill(patternType='solid', fgColor='808080')
+    sheet[rowName].fill = fill_pattern
+wb.save(workingFile)
+print("\nColor Added to Row Header ----- Complete")
+
+
+moveRows = df.iloc[df.index[df['mfr_model_status'] != "Active"], :]
+df.insert([-1], df.pop(moveRows))
+
+# /Users//Desktop/price update/catalog_product_20220802_193713.csv
