@@ -57,10 +57,14 @@ newPriceColumns = []
 workingFile = savePath + '-WORKING.xlsx'
 df = pd.read_excel(workingFile)
 
+
 insert = df.columns.get_loc('product_options_container') + 1
 for col in formulaColumns:
     df.insert(insert, col, None)
     insert = df.columns.get_loc(col) + 1
+
+# insert = df.columns.get_loc('product_options_container') + 1
+# df.insert(insert, ' ', None)
 
 for col in priceColumns:
     insert = df.columns.get_loc(col) + 1
@@ -68,7 +72,7 @@ for col in priceColumns:
     newPriceColumns.append(col + '_NEW')
 
 print ('\nNew Columns ADDED ----- Complete')
-
+    
 def fill_color(val):
     return 'background-color: green'
 df = df.style.applymap(fill_color, subset=newPriceColumns)
@@ -98,8 +102,12 @@ for i in range (65, 91):
 wb.save(workingFile)
 print("\nColor Added to Row Header ----- Complete")
 
+df = pd.read_excel(workingFile)
+inActive = df.loc[(df['mfr_model_status'] != "Active") & (df['a0_mfr_id'] != "TO BE HIDDEN/DISCONTINUED")]
+print(inActive)
 
-moveRows = df.iloc[df.index[df['mfr_model_status'] != "Active"], :]
-df.insert([-1], df.pop(moveRows))
+
+# writer = pd.ExcelWriter(workingFile, engine='openpyxl')
+# df2.to_excel(writer, sheet_name = 'To BE HIDDEN DISCONTINUED')
 
 # /Users//Desktop/price update/catalog_product_20220802_193713.csv
