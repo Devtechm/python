@@ -1,0 +1,89 @@
+from urllib.request import Request, urlopen
+import re
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
+import shutil
+import urllib.request
+import time
+
+
+count = 1
+links = []
+f = open("/users//desktop/test1.txt", "w")
+while (count < 25):
+    link = 'https://tf.com/shop/page/' + str(count)
+    req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
+    html_page = urlopen(req).read()
+
+    soup = BeautifulSoup(html_page, "lxml")
+
+    for link in soup.find_all("img"):
+        data = link.get('src')
+        f.write(data)
+        f.write("\n")
+        links.append(data)
+        # print(data)
+    
+    count+=1
+
+f.close()
+# print(len(links))
+
+infile = "/users//desktop/test1.txt"
+outfile = "/users//desktop/test2.txt"
+
+delete_list = ["https://tf.com/wp-content/uploads/2020/01/logo.png\n", "https://tf.com/wp-content/uploads/2020/04/upload-34000-TFS_Retail_Box-pdf.jpg\n"]
+with open(infile) as fin, open(outfile, "w+") as fout:
+    for line in fin:
+        for word in delete_list:
+            line = line.replace(word, "")
+        fout.write(line)
+
+# with open(r"/users//desktop/test2.txt", 'r') as fp:
+#     lines = len(fp.readlines())
+#     print('Total Number of lines:', lines)
+
+infile = "/users//desktop/test2.txt"
+outfile = "/users//desktop/test3.txt"
+specials = ['https://tf.com/wp-content/uploads/2021/01/19716.png\n', 'https://tf.com/wp-content/uploads/2021/01/19714.png\n', 'https://tf.com/wp-content/uploads/2020/04/J1-combined.jpg\n', 'https://tf.com/wp-content/uploads/2020/04/36604-and-36618-for-product-page-on-website-reduced-size-4.png\n']
+with open(infile) as fin, open(outfile, "w+") as fout:
+    for line in fin:
+        format = line[-5:]
+
+        if line in specials:
+            print(line)
+        else:
+            # tem = line[:-13]
+            tem = line.split("-")[-1]
+            count = (len(tem) + 1) * -1
+            tem = line[:count]
+            line = tem + format
+                    
+        fout.write(line)
+        fileName = line.split("/")[-1].strip()
+
+        opener=urllib.request.build_opener()
+        opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+        urllib.request.install_opener(opener)
+        urllib.request.urlretrieve(line, fileName)
+        time.sleep(3)
+
+
+        
+        # r = requests.get(newLink, stream = True)
+
+        # if r.status_code == 200:
+        # # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+        #     r.raw.decode_content = True
+        
+        # # Open a local file with wb ( write binary ) permission.
+        #     with open('/users//desktop/town','wb') as f:
+        #         shutil.copyfileobj(r.raw, f)
+                
+        #     print('Image sucessfully Downloaded: ',filename)
+        # else:
+        #     print('Image Couldn\'t be retreived')
+
+# read_file = pd.read_csv (r'/users//desktop/test2.txt')
+# read_file.to_csv (r'/users//desktop/test2.csv', index=None)
