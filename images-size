@@ -9,14 +9,15 @@ import time
 
 
 count = 1
-name = []
+names = []
+imgTitle = []
 links = []
-path = '/users//desktop/'
+path = '/users/kitchenall/desktop/'
 infile = path + "web1.txt"
 f = open(infile, "w")
-url = 'https://.com'
+url = 'https://webstaurantstore.com'
 
-# link = 'https:///search/town-food.html'
+# link = 'https://www.webstaurantstore.com/search/town-food.html'
 # req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
 # html_page = urlopen(req).read()
 
@@ -42,58 +43,132 @@ url = 'https://.com'
 
 
 while (count < 7):
-    link = 'https:///search/town-food.html?page=' + str(count) 
-    req = Request(link, headers={'User-Agent': 'Mozilla/5.0'})
+    site = 'https://www.webstaurantstore.com/search/town-food.html?page=' + str(count) 
+    req = Request(site, headers={'User-Agent': 'Mozilla/5.0'})
     html_page = urlopen(req).read()
     soup = BeautifulSoup(html_page, "lxml")
 
-    for titles in soup.find_all("a", attrs={"data-testid":"itemDescription"}):
-        for title in titles:
-            data = title.get_text()
-            if title.startswith("Town 5 "):
-                data = data.replace(' - 12/Pack', '')
-                productName = data.split(" ")[-1].strip()
+    # for titles in soup.find_all("a", attrs={"data-testid":"itemDescription"}):
+    #     for title in titles:
+    #         data = title.get_text()
+    #         if title.startswith("Town 5 "):
+    #             data = data.replace(' - 12/Pack', '')
+    #             productName = data.split(" ")[-1].strip()
 
-            elif title.startswith("Town Bamboo"):
-                productName = data
+    #         elif title.startswith("Town Bamboo"):
+    #             productName = data
 
-            else:
-                data = data.replace('Town', '')
-                productName = data.split(" ")[1].strip()
+    #         else:
+    #             data = data.replace('Town', '')
+    #             productName = data.split(" ")[1].strip()
 
-            name.append(productName)
+    #         name.append(productName)
 
-
+    
     for link in soup.find_all("img"):
-        data = link.get('src')
-        f.write(data)
-        f.write("\n")
-        links.append(data)
+        img = link.get('src')
+        title = link.get('alt')
+        if img.startswith("/images/products/medium/"):
+            f.write(url + img)
+            f.write("\n")
+            links.append(img)
+
+            # if title.startswith("Town 5 "):
+            #     title = title.replace(' - 12/Pack', '')
+            #     title = title.split(" ")[-1].strip()
+
+            # elif title.startswith("Town Bamboo"):
+            #     continue
+
+            # else:
+            #     title = title.replace('Town', '')
+            #     title = title.split(" ")[1].strip()
+
+            names.append(title)
+            # names.append(title)
+            # print(url)
+            # print(title)
+
+    # for title in soup.find_all('div', attrs={"class":"itemDescription"}):
+    #     data=title.find('img', alt=True)
+    # # for titles in soup.find_all("img"):
+    # #     data = link.get('alt')
+    # #     # data = link.get_text()
+    #      print(title['alt'])
+        # if data.startswith("Town "):
+        #     print(data)
+
+        #     if data.startswith("Town Bamboo"):
+        #         productName = data
+        #     else:
+        #         data = data.replace(' - 12/Pack', '')
+        #         productName = data.split(" ")[-1].strip()
+                    
+        #     names.append(productName)
+
+            # else:
+            #     data = data.replace('Town', '')
+            #     productName = data.split(" ")[1].strip()
+
+
+
+    # for link in soup.find_all("img"):
+    #     data = link.get('src')
+    #     f.write(data)
+    #     f.write("\n")
+    #     links.append(data)
     
     count+=1
 
 f.close()
 # print(len(links))
+# print(names)
+for name in names:
+    count=1
+    if name.startswith("Town "):
+        if name.startswith("Town Bamboo"):
+            name.strip()
+        elif name.startswith("Town 5 "):
+            name = name.replace(' - 12/Pack', '')
+            name = name.split(" ")[-1].strip()
+
+        else:
+            name = name.replace('Town', '')
+            name = name.split(" ")[1].strip()
+        
+    name.replace('/', '_')
+    if name in imgTitle:
+        name = name + "_" + str(count)
+        count+=1
+        # print(name)
+            
+    
+    imgTitle.append(name)
+        # print(name)
+                # print((name + format).strip())
+# print(imgTitle)
 
 count=0
 outfile = path + "web2.txt"
 with open(infile) as fin, open(outfile, 'w') as fout:
     for link in fin:
-        if link.startswith("/images/products/"):
-            format = link[-5:]
-            link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
-            link = url + link
-            fout.write(link)
-            fileName = (name[count] + format).strip()
-            # print(fileName)
+        # if link.startswith("/images/products/"):
+        format = link[-5:]
+        link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
+            # link = site + link
+        fout.write(link)
+            
+            # fileName = imgTitle[count]
+        fileName = (imgTitle[count] + format).strip().lower()
+        print(fileName)
 
-            opener=urllib.request.build_opener()
-            opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
-            urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(link, fileName)
-            time.sleep(3)
+        opener=urllib.request.build_opener()
+        opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+        urllib.request.install_opener(opener)
+        urllib.request.urlretrieve(link, fileName)
+        time.sleep(3)
         
-        else:
-            link = link.replace(link, "")
+        # else:
+        #     link = link.replace(link, "")
         
         count+=1
