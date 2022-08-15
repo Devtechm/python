@@ -6,19 +6,20 @@ import requests
 import shutil
 import urllib.request
 import time
+from urllib.parse import urlparse
 
 
 count = 1
 names = []
 imgTitle = []
 links = []
-path = '/users//desktop/'
+path = '/users/don/desktop/'
 infile = path + "web1.txt"
 f = open(infile, "w")
-url = 'https://.com'
+url = 'https://web.com'
 
 while (count < 7):
-    site = 'https://www..com/search/town-food.html?page=' + str(count) 
+    site = 'https://www.web.com/search/town-food.html?page=' + str(count) 
     req = Request(site, headers={'User-Agent': 'Mozilla/5.0'})
     html_page = urlopen(req).read()
     soup = BeautifulSoup(html_page, "lxml")
@@ -30,18 +31,6 @@ while (count < 7):
             f.write(url + img)
             f.write("\n")
             links.append(img)
-
-            # if title.startswith("Town 5 "):
-            #     title = title.replace(' - 12/Pack', '')
-            #     title = title.split(" ")[-1].strip()
-
-            # elif title.startswith("Town Bamboo"):
-            #     continue
-
-            # else:
-            #     title = title.replace('Town', '')
-            #     title = title.split(" ")[1].strip()
-
             names.append(title)
 
     count+=1
@@ -74,20 +63,44 @@ count=0
 outfile = path + "web2.txt"
 with open(infile) as fin, open(outfile, 'w') as fout:
     for link in fin:
-        # if link.startswith("/images/products/"):
-        format = link[-5:]
-        link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
-            # link = site + link
-        fout.write(link)
+        if link.startswith("https://"):
+            format = link[-5:]
+            link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
             
-            # fileName = imgTitle[count]
-        fileName = (imgTitle[count] + format).strip().lower()
-        print(fileName)
+	    if is_url(link) != true:
+		link = link.replace('extra_large', 'large')
 
-        opener=urllib.request.build_opener()
-        opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
-        urllib.request.install_opener(opener)
-        urllib.request.urlretrieve(link, fileName)
-        time.sleep(3)
+            #response = requests.get(link)
+            #if response.status_code != 200:
+                #link = link.replace('extra_large', 'large')
+                #print(link)
+
+            fileName = (imgTitle[count] + format).strip().lower()
+
+            # opener=urllib.request.build_opener()
+            # opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+            # urllib.request.install_opener(opener)
+            # urllib.request.urlretrieve(link, fileName)
+            # try:
+            #     link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
+            #     urllib.request.urlretrieve(link, fileName)
+
+            # except:
+            #     link = link.replace('extra_large', 'large')
+            #     urllib.request.urlretrieve(link, fileName)
+
+            fout.write(link)
+            # print(fileName, " ", link)
+            time.sleep(3)
         
         count+=1
+
+print(count)
+
+
+def is_url(url):
+  try:
+    result = urlparse(url)
+    return all([result.scheme, result.netloc])
+  except ValueError:
+    return False
