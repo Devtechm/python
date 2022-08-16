@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 import shutil
-import urllib.request
 import time
+import urllib.request, urllib.error
 from urllib.parse import urlparse
 
 
@@ -19,7 +19,7 @@ f = open(infile, "w")
 url = 'https://web.com'
 
 while (count < 7):
-    site = 'https://www.web.com/search/town-food.html?page=' + str(count) 
+    site = 'https://www.web/search/town-food.html?page=' + str(count) 
     req = Request(site, headers={'User-Agent': 'Mozilla/5.0'})
     html_page = urlopen(req).read()
     soup = BeautifulSoup(html_page, "lxml")
@@ -53,9 +53,7 @@ for name in names:
     name.replace('/', '_')
     if name in imgTitle:
         name = name + "_" + str(count)
-        count+=1
-        # print(name)
-            
+        count+=1            
     
     imgTitle.append(name)
 
@@ -67,40 +65,28 @@ with open(infile) as fin, open(outfile, 'w') as fout:
             format = link[-5:]
             link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
             
-	    if is_url(link) != true:
-		link = link.replace('extra_large', 'large')
+            try:
+                req = urllib.request.urlopen(link)
 
-            #response = requests.get(link)
-            #if response.status_code != 200:
-                #link = link.replace('extra_large', 'large')
-                #print(link)
+            except urllib.error.HTTPError as e:                
+                print(e.code)
+                if e.code == 404:
+                    link = link.replace('extra_', '')
+                    print(link)
+
+            except urllib.error.URLError as e:
+                print("\n", link, "\n", e, "\n")
 
             fileName = (imgTitle[count] + format).strip().lower()
-
-            # opener=urllib.request.build_opener()
-            # opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
-            # urllib.request.install_opener(opener)
-            # urllib.request.urlretrieve(link, fileName)
-            # try:
-            #     link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
-            #     urllib.request.urlretrieve(link, fileName)
-
-            # except:
-            #     link = link.replace('extra_large', 'large')
-            #     urllib.request.urlretrieve(link, fileName)
+            fileName = fileName.replace('/', '-')
+            opener=urllib.request.build_opener()
+            opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+            urllib.request.install_opener(opener)
+            urllib.request.urlretrieve(link, fileName)
 
             fout.write(link)
-            # print(fileName, " ", link)
             time.sleep(3)
         
         count+=1
 
 print(count)
-
-
-def is_url(url):
-  try:
-    result = urlparse(url)
-    return all([result.scheme, result.netloc])
-  except ValueError:
-    return False
