@@ -1,25 +1,29 @@
 import csv
 import pandas as pd
+from pandas import ExcelWriter
 import os
 from datetime import datetime
 import shutil
+from openpyxl import load_workbook
 import openpyxl
 from openpyxl.styles import PatternFill
 
 
 d = datetime.today()
 date = d.strftime("%m%d%Y")
+mainDir = '/Users/don/Desktop/price update/'
 
 print('\n\n-------------------------')
-exportFile = input('Enter the export CSV path:\n')
+exportFile = input('Enter the export CSV name:\n')
+exportFile = mainDir + exportFile
 brandName = input('\nEnter Brand name without space:\n')
 
-mainDir = '/Users//Desktop/price update/'
 subDir = mainDir + brandName + '/'
 os.mkdir (subDir)
 print ('\nBrand Folder Created ----- Complete')
 
-savePath = subDir + brandName + '_price_update-' + date
+subDir = mainDir + 'beverage air' + '/'
+savePath = subDir + 'beverage air' + '_price_update-' + date
 backupPath = savePath + '-BACKUP.csv'
 shutil.copyfile(exportFile, backupPath)
 print ('\nBackup File Renamed ----- Complete')
@@ -63,15 +67,23 @@ for col in formulaColumns:
     df.insert(insert, col, None)
     insert = df.columns.get_loc(col) + 1
 
-# insert = df.columns.get_loc('product_options_container') + 1
-# df.insert(insert, ' ', None)
-
 for col in priceColumns:
     insert = df.columns.get_loc(col) + 1
     df.insert(insert, col + '_NEW', None)
     newPriceColumns.append(col + '_NEW')
 
 print ('\nNew Columns ADDED ----- Complete')
+
+inActive = df.loc[(df['mfr_model_status'] != "Active")]
+sheet2 = subDir + 'TO BE HIDDEN DISCONTINUED.xlsx'
+df2 = pd.DataFrame(inActive)
+df2.to_excel(sheet2, 'TO BE HIDDEN DISCONTINUED', encoding='utf-8', index=False, header=True)
+print("\nSave Discontinued to new sheet ----- Complete")
+
+df = df.loc[(df['mfr_model_status'] == "Active")]
+df.shape
+
+
     
 def fill_color(val):
     return 'background-color: green'
@@ -85,9 +97,9 @@ wb = openpyxl.load_workbook(filename=workingFile)
 sheet = wb['Sheet1']
 emptyRow = ['']
 indent=0
-# while (indent < 2):
-#     sheet.append(emptyRow)
-#     indent+=1
+while (indent < 2):
+    sheet.append(emptyRow)
+    indent+=1
 
 discontinue = ['TO BE HIDDEN/DISCONTINUED']
 sheet.append(discontinue)
@@ -102,12 +114,30 @@ for i in range (65, 91):
 wb.save(workingFile)
 print("\nColor Added to Row Header ----- Complete")
 
+
 df = pd.read_excel(workingFile)
-inActive = df.loc[(df['mfr_model_status'] != "Active") & (df['a0_mfr_id'] != "TO BE HIDDEN/DISCONTINUED")]
-print(inActive)
+df2 = pd.read_excel(sheet2)
+df3 = pd.concat(df, df2)
+df3.to_excel(workingFile, encoding='utf-8', index=False, header=True)
 
 
-# writer = pd.ExcelWriter(workingFile, engine='openpyxl')
-# df2.to_excel(writer, sheet_name = 'To BE HIDDEN DISCONTINUED')
 
-# /Users//Desktop/price update/catalog_product_20220802_193713.csv
+# sheet2 = subDir + 'TO BE HIDDEN DISCONTINUED.xlsx'
+# title = ['sku', 'visibility', 'product_online', 'manage_stock', 'use_config_manage_stock', 'is_in_stock', 'mfr_model_status', 'mfr_model_replacement', 'mfr_model_status_date_update', 'ext_stock_status_in', 'ext_stock_status_out']
+# df2 = pd.DataFrame(columns = title)
+# writer = ExcelWriter(sheet2)
+# df2.to_excel(writer,'TO BE HIDDEN DISCONTINUED', encoding='utf-8', index=False, header=True)
+# writer.save()
+# print("Create TO BE HIDDEN DISCONTINUED sheet ----- Completed")
+
+# tem = subDir + 'tem.xlsx'
+# df2 = pd.DataFrame(inActive)
+# df2.to_excel(tem, encoding='utf-8', index=False, header=True)
+# print("Save Discontinued to new sheet ----- Completed")
+
+#Move Inactive rows under Discontinued
+#Find different category
+#Pull data from update file
+#Apply pricing formulas
+#Add Discontinued Sku to sheet2
+#Move sheet2 to main sheet
