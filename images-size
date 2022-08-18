@@ -7,19 +7,21 @@ import shutil
 import time
 import urllib.request, urllib.error
 from urllib.parse import urlparse
+import os
 
 
 count = 1
 names = []
 imgTitle = []
 links = []
-path = '/users/don/desktop/'
+path = '/users//desktop/'
 infile = path + "web1.txt"
 f = open(infile, "w")
 url = 'https://web.com'
+brand = 'Town Food'
 
 while (count < 7):
-    site = 'https://www.web/search/town-food.html?page=' + str(count) 
+    site = 'https://www.web.com/search/town-food.html?page=' + str(count) 
     req = Request(site, headers={'User-Agent': 'Mozilla/5.0'})
     html_page = urlopen(req).read()
     soup = BeautifulSoup(html_page, "lxml")
@@ -77,8 +79,13 @@ with open(infile) as fin, open(outfile, 'w') as fout:
             except urllib.error.URLError as e:
                 print("\n", link, "\n", e, "\n")
 
+            saveTo = path + brand
+            if not os.path.exists(saveTo):
+                os.makedirs(saveTo)
+
             fileName = (imgTitle[count] + format).strip().lower()
             fileName = fileName.replace('/', '-')
+            fileName = os.path.join(saveTo, fileName)
             opener=urllib.request.build_opener()
             opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
             urllib.request.install_opener(opener)
