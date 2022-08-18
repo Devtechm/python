@@ -1,0 +1,49 @@
+import pandas as pd
+import numpy as np
+
+info_workbook = '/Users//Desktop/Book1.xlsx'
+output_workbook = '/Users//Desktop/Book2.xlsx'
+output = '/Users//Desktop/Book3.xlsx'
+
+specials = {'Etl': 'ETL', 'etl':'ETL', 
+            'Nsf': 'NSF', 'nsf': 'NSF',
+            'Cetlus': 'cETLus', 'cetlus': 'cETLus', 'CETLus':'cETLus',
+            'Btu': 'BTU', 'btu':'BTU', 
+            'Culus':'cULus', 'culus':'cULus',
+            'Nsf. Culus':'NSF, cULus', 'nsf. culus':'NSF, cULus',
+            'Csa sanitation​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌':'CSA Sanitation​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌', 'csa sanitation​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌':'CSA Sanitation​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌'
+            }
+
+# df = pd.read_excel(info_workbook) 
+
+# df['Specification'] = df['Specification'].str.title()
+# df['Specification'] = df['Specification'].str.replace(', ','#') 
+# df['Specification'] = df['Specification'].str.replace('Etl#Nsf','ETL, NSF')
+# df['Specification'] = df['Specification'].str.replace('cETLus#NSF​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌','cETLus, NSF​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌')
+# df['Specification'] = df['Specification'].str.replace('#','\n') 
+# df['Specification'] = df['Specification'].str.replace('\n000',',000') 
+# df['Specification'] = df['Specification'].str.replace('Btu','BTU')
+# df['Specification'] = df['Specification'].str.replace('Etl','ETL')
+# df['Specification'] = df['Specification'].str.replace('Nsf','NSF')
+# df['Specification'] = df['Specification'].str.replace(' (Contact Factory For Availability And Price)​​‌‌​‌​‍​​‌​​​‍​​‌​​‌‍​​​‌‌​‍​​​‌‌‌‍​​‌‌‌​‍​​‌‌​‌‍​​‌‌​‌‍​‌​​‌​‍​​‌‌​‌‍​​‌‌‌‌‍​​‌​‌‌‍​​‌​‌​‍​‌​​‌​‍​​‌​‌‌‍​​‌‌​‌‌‍​​‌‌‌​‍​​‌‌​‌‌‍​‌​​‌​‍​​‌‌‌‌​‍​​​‌‌​‍​​‌​‌​‍​​‌‌‌‌​‍​‌​​‌​‍​​‌‌​‌‌‍​​‌‌​‌‌‍​​​‌‌‌‍​​‌‌​‌​‍​​‌​‌‌‍​​‌‌‌​‍​​‌‌​​‌‍​​‌​​‌‍​​‌‌​​‍​​‌​​​‍​​‌‌​​‍​​‌‌​‌‌', '')
+
+# df.to_excel(output_workbook,  index=False)
+
+
+paragraph = 'Quality, performance and value are the hallmarks of Globe equipment.  From a 9" economy slicer to a 175 lb.  spiral dough mixer, Globe offers the widest selection of mixers and slicers, with the perfect match for any application.'
+paragraph = '<p>' + paragraph + '</p><br><strong>Standard Features</strong><br><br><ul><li>'
+
+df2 = pd.read_excel(info_workbook) 
+df2['description'] = df2['description'].str.replace(' ', 'z9z')
+df2['description'] = df2['description'].str.replace(',z9z', '.')
+df2['description'] = df2['description'].str.title()
+df2['description'] = df2['description'].str.replace('Z9Z',' ')
+df2['description'] = df2['description'].str.replace('z9Z',' ')
+
+for k, v in specials.items():
+    df2['description'] = df2['description'].str.replace(k, v)
+
+df2['description'] = df2['description'].str.replace('.','</li><li>')
+df2['description'] = paragraph + df2['description'] + '</li>'
+print(df2)
+df2.to_excel(output,  index=False)
