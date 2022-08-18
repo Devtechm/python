@@ -85,9 +85,9 @@ df.shape
 
 
     
-def fill_color(val):
-    return 'background-color: green'
-df = df.style.applymap(fill_color, subset=newPriceColumns)
+# def fill_color(val):
+#     return 'background-color: green'
+# df = df.style.applymap(fill_color, subset=newPriceColumns)
 df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
 print ('\nNew Columns Color ADDED ----- Complete')
 
@@ -107,18 +107,27 @@ wb.save(workingFile)
 print("\nDiscontinue Row Added ----- Complete")
 
 lastRow = len(sheet['A'])
+
+
+
+df = pd.read_excel(workingFile)
+df2 = pd.read_excel(sheet2)
+df = df.append(df2, ignore_index=True)
+
+def fill_color(val):
+    return 'background-color: green'
+df = df.style.applymap(fill_color, subset=newPriceColumns)
+
+df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
+
+wb = openpyxl.load_workbook(filename=workingFile)
+sheet = wb['Sheet1']
 for i in range (65, 91):
     rowName = chr(i) + str(lastRow)
     fill_pattern = PatternFill(patternType='solid', fgColor='808080')
     sheet[rowName].fill = fill_pattern
 wb.save(workingFile)
 print("\nColor Added to Row Header ----- Complete")
-
-
-df = pd.read_excel(workingFile)
-df2 = pd.read_excel(sheet2)
-df3 = pd.concat(df, df2)
-df3.to_excel(workingFile, encoding='utf-8', index=False, header=True)
 
 
 
