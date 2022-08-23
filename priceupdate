@@ -57,7 +57,7 @@ print ('\nWorking File Created ----- Complete')
 dest = shutil.move(workingFile, mainDir)
 print ('\nFile organized ----- Complete')
 
-formulaColumns = [' ', 'VLOOKUP', 'COST Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula', '']
+formulaColumns = [' ', 'VLOOKUP', 'Cost Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula', '']
 priceColumns = ['gen_price_update_date', 'ka_price_list', 'cost', 'cost_freight', 'cost_special_model', 'cost_special_value', 'cost_web', 'ka_price_map', 'price', 'ka_price_local']
 newPriceColumns = []
 workingFile = savePath + '-WORKING.xlsx'
@@ -77,7 +77,7 @@ for col in priceColumns:
 print ('\nNew Columns ADDED ----- Complete')
 
 inActive = df.loc[(df['mfr_model_status'] != "Active")]
-sheet2 = subDir + 'TO BE HIDDEN DISCONTINUED.xlsx'
+sheet2 = savePath + 'TO BE HIDDEN DISCONTINUED.xlsx'
 df2 = pd.DataFrame(inActive)
 df2.to_excel(sheet2, 'TO BE HIDDEN DISCONTINUED', encoding='utf-8', index=False, header=True)
 print("\nSave Discontinued to new sheet ----- Complete")
@@ -86,10 +86,6 @@ df = df.loc[(df['mfr_model_status'] == "Active")]
 df.shape
 
 
-    
-# def fill_color(val):
-#     return 'background-color: green'
-# df = df.style.applymap(fill_color, subset=newPriceColumns)
 df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
 print ('\nNew Columns Color ADDED ----- Complete')
 
@@ -116,8 +112,27 @@ df = pd.read_excel(workingFile)
 df2 = pd.read_excel(sheet2)
 df = df.append(df2, ignore_index=True)
 
-
 date = d.strftime("%m/%d/%Y")
+
+title = ['visibility', 'product_online', 'manage_stock', 'use_config_manage_stock', 'is_in_stock', 'mfr_model_status', 'mfr_model_replacement', 'mfr_model_status_date_update', 'ext_stock_status_in', 'ext_stock_status_out']
+values = ['Catalog, Search', '1', '1', '0', '0', 'Discontinued', ' ', date, '_EMPTY_VALUE_', '_EMPTY_VALUE_']
+df2 = df2['sku']
+df2.to_excel(sheet2, encoding='utf-8', index=False, header=True)
+
+df2 = pd.read_excel(sheet2)
+insert = df2.columns.get_loc('sku') + 1
+count = 0
+for col in title:
+    df2.insert(insert, col, None)
+    df2[col] = values[count]
+    insert = df2.columns.get_loc(col) + 1
+    count+=1
+
+hidden = savePath + '-HIDDEN-IMPORT.csv'
+df2.to_csv(hidden, encoding='utf-8', index=False, header=True)
+print("Create Hidden sheet ----- Completed")
+
+
 df = df.assign(gen_price_update_date_NEW=date)
 
 # vendorFile = input('\n-------------------------\nEnter the file name of the updated pricing provided by vendor:\n')
@@ -126,7 +141,6 @@ vendorFile = 'BEVERAGE-AIR COOLERS & ACCESSORIES -AUG 2022 FIELD COPY.xlsx'
 vendorFile = mainDir + vendorFile
 df3 = pd.read_excel(vendorFile)
 
-# df.replace({'ka_price_list_NEW': df3}, inplace=True)
 df['ka_price_list_NEW']=df['a0_mfr_id'].map(dict(zip(df3.Model,df3.List)))
 df['VLOOKUP']=df['a0_mfr_id'].map(dict(zip(df3.Model,df3.MAP)))
 
@@ -136,7 +150,7 @@ categoryList = [x for x in categoryList if str(x) != 'nan']
 print(categoryList)
 
 
-formulas = ['COST Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula']
+formulas = ['Cost Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula']
 
 if len(categoryList) != 0:
     for catagory in categoryList:
@@ -157,9 +171,20 @@ else:
                 df[formula] = round(df['ka_price_list_NEW'] * float(getInput), 2)
 
 
+df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
+print("\nApply price formulas ----- Completed")
+
+
+df = pd.read_excel(workingFile)
+movePriceColumns = ['cost_New', 'cost_freight_New', 'ka_price_map_NEW', 'price_NEW', 'ka_price_local_NEW']
+moveFormulaColumns = ['Cost Formula', 'Cost Freight Formula', 'VLOOKUP', 'Price Formula', 'LP Formula']
+
+count = 0
+for col in movePriceColumns:
+    df[col]=df[moveFormulaColumns[count]]
+    count+=1
 
 df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
-
 
 
 def fill_color(val):
@@ -177,33 +202,25 @@ for i in range (65, 91):
 wb.save(workingFile)
 print("\nColor Added to Row Header ----- Complete")
 
-# -----------------------------------------------------
-# date = d.strftime("%m/%d/%Y")
-# df = pd.read_excel(workingFile)
-# df = df.assign(gen_price_update_date_NEW=date)
-# df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
+os.remove(sheet2)
 
-# vendorFile = input('Enter the file name of the updated pricing provided by vendor:\n')
-# vendorFile = mainDir + exportFile
+print("\n\nDouble check the working file before proceeding!")
+input("Press the <ENTER> key to continue...")
 
 
+backupPath = savePath + '-BACKUP.xlsx'
+shutil.copyfile(workingFile, backupPath)
+df3 = pd.read_excel(backupPath)
+df3.drop(df3.index[lastRow])
+df3 = df3.loc[(df3['mfr_model_status'] == "Active")]
+df3.shape
+df3 = df3[['sku', 'gen_price_update_date_NEW', 'ka_price_list_NEW', 'cost_NEW', 'cost_freight_NEW', 'cost_special_model_NEW', 'cost_special_value_NEW', 'cost_web_NEW', 'ka_price_map_NEW', 'price_NEW', 'ka_price_local_NEW']]
+df3.dropna(how='all', axis=1, inplace=True)
+df3.to_excel(backupPath, encoding='utf-8', index=False, header=True)
 
-# sheet2 = subDir + 'TO BE HIDDEN DISCONTINUED.xlsx'
-# title = ['sku', 'visibility', 'product_online', 'manage_stock', 'use_config_manage_stock', 'is_in_stock', 'mfr_model_status', 'mfr_model_replacement', 'mfr_model_status_date_update', 'ext_stock_status_in', 'ext_stock_status_out']
-# df2 = pd.DataFrame(columns = title)
-# writer = ExcelWriter(sheet2)
-# df2.to_excel(writer,'TO BE HIDDEN DISCONTINUED', encoding='utf-8', index=False, header=True)
-# writer.save()
-# print("Create TO BE HIDDEN DISCONTINUED sheet ----- Completed")
+df3 = pd.read_excel(backupPath)
+df3.columns = df3.columns.str.replace('_New', '')
+importFile = savePath + '-IMPORT.csv'
+df3.to_csv(importFile, encoding='utf-8', index=False, header=True)
+os.remove(backupPath)
 
-# tem = subDir + 'tem.xlsx'
-# df2 = pd.DataFrame(inActive)
-# df2.to_excel(tem, encoding='utf-8', index=False, header=True)
-# print("Save Discontinued to new sheet ----- Completed")
-
-#Move Inactive rows under Discontinued
-#Find different category
-#Pull data from update file
-#Apply pricing formulas
-#Add Discontinued Sku to sheet2
-#Move sheet2 to main sheet
