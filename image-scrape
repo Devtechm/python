@@ -1,0 +1,101 @@
+from urllib.request import Request, urlopen
+import re
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
+import shutil
+import time
+import urllib.request, urllib.error
+from urllib.parse import urlparse
+import os
+import requests, re
+
+
+pageTotal = 0
+names = []
+imgTitle = []
+links = []
+path = '/users//desktop/'
+infile = path + "web1.txt"
+f = open(infile, "w")
+url = 'https://web.com'
+brand = 'Hobart'
+site = 'https://www.web.com/37911/hobart-mixer-accessories.html?page='
+sites = []
+status = 0
+while (status != 404):
+    pageTotal+=1
+    page = site + str(pageTotal)
+    r = requests.head(page)
+    status = r.status_code
+    if status != 404:
+        sites.append(page)
+
+for s in sites:
+    req = Request(s, headers={'User-Agent': 'Mozilla/5.0'})
+    html_page = urlopen(req).read()
+    soup = BeautifulSoup(html_page, "lxml")
+    
+    for link in soup.find_all("img"):
+        img = link.get('src')
+        title = link.get('alt')
+        if img.startswith("/images/products/medium/"):
+            f.write(url + img)
+            f.write("\n")
+            links.append(img)
+            names.append(title)
+
+f.close()
+
+for name in names:
+    count=1
+
+    if name.startswith(brand):
+        name = name.replace(brand, '')
+        name = name.split(" ")[1].strip()
+
+    name.replace('/', '_')
+    if name in imgTitle:
+        name = name + "_" + str(count)
+        count+=1            
+    
+    imgTitle.append(name)
+
+count=0
+outfile = path + "web2.txt"
+with open(infile) as fin, open(outfile, 'w') as fout:
+    for link in fin:
+        if link.startswith("https://"):
+            format = link[-5:]
+            link = link.replace('small', 'extra_large').replace('medium', 'extra_large')
+            
+            try:
+                req = urllib.request.urlopen(link)
+
+            except urllib.error.HTTPError as e:                
+                print(e.code)
+                if e.code == 404:
+                    link = link.replace('extra_', '')
+                    print(link)
+
+            except urllib.error.URLError as e:
+                print("\n", link, "\n", e, "\n")
+
+            saveTo = path + brand
+            if not os.path.exists(saveTo):
+                os.makedirs(saveTo)
+
+            fileName = (imgTitle[count] + format).strip().lower()
+            fileName = fileName.replace('/', '-')
+            fileName = os.path.join(saveTo, fileName)
+            opener=urllib.request.build_opener()
+            opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+            urllib.request.install_opener(opener)
+            urllib.request.urlretrieve(link, fileName)
+
+            fout.write(link)
+            time.sleep(3)
+        
+        count+=1
+
+print(count)
