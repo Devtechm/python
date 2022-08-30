@@ -14,18 +14,16 @@ date = d.strftime("%m%d%Y")
 mainDir = '/Users//Desktop/price update/'
 
 print('\n\n-------------------------')
-# exportFile = input('Enter the export CSV name:\n')
-exportFile = 'catalog_product_20220815_192233.csv'
+exportFile = input('Enter the export CSV name:\n')
 exportFile = mainDir + exportFile
-# brandName = input('\nEnter Brand name without space:\n')
-brandName = 'beverage air'
+brandName = input('\nEnter Brand name without space:\n')
 
 subDir = mainDir + brandName + '/'
 os.mkdir (subDir)
 print ('\nBrand Folder Created ----- Complete')
 
-subDir = mainDir + 'beverage air' + '/'
-savePath = subDir + 'beverage air' + '_price_update-' + date
+subDir = mainDir + brandName + '/'
+savePath = subDir + brandName + '_price_update-' + date
 backupPath = savePath + '-BACKUP.csv'
 shutil.copyfile(exportFile, backupPath)
 print ('\nBackup File Renamed ----- Complete')
@@ -54,7 +52,8 @@ read_file = pd.read_csv (workingFile, encoding='latin-1')
 read_file.to_excel (savePath + '-WORKING.xlsx', index = None, header=True)
 print ('\nWorking File Created ----- Complete')
 
-dest = shutil.move(workingFile, mainDir)
+# dest = shutil.move(workingFile, mainDir)
+os.remove(workingFile)
 print ('\nFile organized ----- Complete')
 
 formulaColumns = [' ', 'VLOOKUP', 'Cost Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula', '']
@@ -135,23 +134,21 @@ print("Create Hidden sheet ----- Completed")
 
 df = df.assign(gen_price_update_date_NEW=date)
 
-# vendorFile = input('\n-------------------------\nEnter the file name of the updated pricing provided by vendor:\n')
-vendorFile = 'BEVERAGE-AIR COOLERS & ACCESSORIES -AUG 2022 FIELD COPY.xlsx'
+vendorFile = input('\n-------------------------\nEnter the file name of the updated pricing provided by vendor:\n')
+# vendorFile = 'COOLERS & ACCESSORIES -AUG 2022 FIELD COPY.xlsx'
 
 vendorFile = mainDir + vendorFile
 df3 = pd.read_excel(vendorFile)
 
-df['ka_price_list_NEW']=df['a0_mfr_id'].map(dict(zip(df3.Model,df3.List)))
-df['VLOOKUP']=df['a0_mfr_id'].map(dict(zip(df3.Model,df3.MAP)))
+df['ka_price_list_NEW']=df['a0_mfr_id'].map(dict(zip(df3.a0_mfr_id,df3.list)))
+df['VLOOKUP']=df['a0_mfr_id'].map(dict(zip(df3.a0_mfr_id,df3.map)))
 
 categoryList = df['mfr_discount_product_category'].to_list()
 categoryList = [*set(categoryList)]
 categoryList = [x for x in categoryList if str(x) != 'nan']
-print(categoryList)
-
+print("\n\nCategory: ", categoryList, "\n")
 
 formulas = ['Cost Formula', 'Cost Freight Formula', 'Price Formula', 'LP Formula']
-
 if len(categoryList) != 0:
     for catagory in categoryList:
         print(catagory)
@@ -160,14 +157,26 @@ if len(categoryList) != 0:
             print("Enter n or no to skip")
             getInput = input()
             if getInput != 'n':
-                df.loc[(df['gen_vendor'] == catagory), formula] = round(df['ka_price_list_NEW'] * float(getInput), 2)
+                if(formula == 'Cost Freight Formula'):
+                    getInput = "".join(getInput.split()).replace("+", " ")
+                    freight = getInput.split()
+                    df.loc[(df['gen_vendor'] == catagory), formula] = round(df['ka_price_list_NEW'] * float(freight[0]) + float(freight[1]) + float(freight[2]), 2)
+                
+                else:
+                    df.loc[(df['gen_vendor'] == catagory), formula] = round(df['ka_price_list_NEW'] * float(getInput), 2)
 
 else:
     for formula in formulas:
-            print("\nWhat is the ", formula)
-            print("Enter n or no to skip")
-            getInput = input()
-            if getInput != 'n':
+        print("\nWhat is the ", formula)
+        print("Enter n or no to skip")
+        getInput = input()
+        if getInput != 'n':
+            if(formula == 'Cost Freight Formula'):
+                getInput = "".join(getInput.split()).replace("+", " ")
+                freight = getInput.split()
+                df[formula] = round(df['ka_price_list_NEW'] * float(freight[0]) + float(freight[1]) + float(freight[2]), 2)
+            
+            else:
                 df[formula] = round(df['ka_price_list_NEW'] * float(getInput), 2)
 
 
@@ -176,12 +185,12 @@ print("\nApply price formulas ----- Completed")
 
 
 df = pd.read_excel(workingFile)
-movePriceColumns = ['cost_New', 'cost_freight_New', 'ka_price_map_NEW', 'price_NEW', 'ka_price_local_NEW']
+movePriceColumns = ['cost_NEW', 'cost_freight_NEW', 'ka_price_map_NEW', 'price_NEW', 'ka_price_local_NEW']
 moveFormulaColumns = ['Cost Formula', 'Cost Freight Formula', 'VLOOKUP', 'Price Formula', 'LP Formula']
 
 count = 0
 for col in movePriceColumns:
-    df[col]=df[moveFormulaColumns[count]]
+    df[col]=round(df[moveFormulaColumns[count]], 0)
     count+=1
 
 df.to_excel(workingFile, encoding='utf-8', index=False, header=True)
@@ -219,7 +228,7 @@ df3.dropna(how='all', axis=1, inplace=True)
 df3.to_excel(backupPath, encoding='utf-8', index=False, header=True)
 
 df3 = pd.read_excel(backupPath)
-df3.columns = df3.columns.str.replace('_New', '')
+df3.columns = df3.columns.str.replace('_NEW', '')
 importFile = savePath + '-IMPORT.csv'
 df3.to_csv(importFile, encoding='utf-8', index=False, header=True)
 os.remove(backupPath)
