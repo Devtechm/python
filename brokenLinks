@@ -1,0 +1,79 @@
+from urllib.request import Request, urlopen
+import re
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
+import shutil
+import time
+import urllib.request, urllib.error
+from urllib.parse import urlparse
+import os
+import requests, re
+
+
+path = '/users//desktop/'
+infile = path + "links.txt"
+outfile = path + "404-links.txt"
+sites = []
+url = 'https://.com'
+page = 'https://.com/collections/all?page='
+status = 0
+currentPage = 1
+
+pageTotal = page + str(currentPage)
+req = Request(pageTotal, headers={'User-Agent': 'Mozilla/5.0'})
+html_page = urlopen(req).read()
+soup = BeautifulSoup(html_page, 'lxml')
+    
+for span in soup.find_all("span", class_='pagination__page-count'):
+    pageTotal = span.text
+
+pageTotal = int(pageTotal.replace('Page 1 / ', ''))
+print("Total of product pages: ", pageTotal)
+
+while (currentPage <= pageTotal):
+    site = page + str(currentPage)
+    sites.append(site)     
+    currentPage+=1
+
+f = open(infile, "w")
+for s in sites:
+    print("----- Current page: ", s, " -----")
+    req = Request(s, headers={'User-Agent': 'Mozilla/5.0'})
+    html_page = urlopen(req).read()
+    soup = BeautifulSoup(html_page, 'lxml')
+
+    for a in soup.find_all('a', class_='product-item__title'):
+        ahref = a.get('href')
+        f.write(url + ahref)
+        f.write("\n")
+                # sites.append(ahref)
+        print(url + ahref)
+        time.sleep(3)
+
+f.close()
+
+# with open(infile) as fin, open(outfile, 'w') as fout:
+#     for invalid in fin:
+#         header= {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) ' 
+#       'AppleWebKit/537.11 (KHTML, like Gecko) '
+#       'Chrome/23.0.1271.64 Safari/537.11',
+#       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+#       'Accept-Encoding': 'none',
+#       'Accept-Language': 'en-US,en;q=0.8',
+#       'Connection': 'keep-alive'}
+#         req = urllib.request.Request(url=link, headers=header) 
+
+#         try:
+#             site = urllib.request.urlopen(req).read()
+
+#         except urllib.error.HTTPError as e:                
+#             print(e.code)
+#             if e.code == 404:
+#                 print(invalid)
+#                 fout.write(invalid)
+
+#         except urllib.error.URLError as e:
+#             print("\n", invalid, "\n", e, "\n")
+
